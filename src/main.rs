@@ -26,6 +26,21 @@ macro_rules! one_bar_note_off {
     };
 }
 
+macro_rules! write_major_on {
+    ( $t:expr , $f:expr, $root:expr) => {
+        one_bar_note_on!($t, $f, $root);
+        one_bar_note_on!([&0_u8], $f, $root + 4);
+        one_bar_note_on!([&0_u8], $f, $root + 7);
+    }
+}
+macro_rules! write_major_off {
+    ( $t:expr , $f:expr, $root:expr) => {
+        one_bar_note_off!($t, $f, $root);
+        one_bar_note_off!([&0_u8], $f, $root + 4);
+        one_bar_note_off!([&0_u8], $f, $root + 7);
+    }
+}
+
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match fs::create_dir("./output") {
@@ -160,41 +175,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(&100_u8.to_be_bytes())?;   // 64 ボリューム100
 
     // Cを鳴らす
-    one_bar_note_on!([&0_u8], file, &60_u8);
-    one_bar_note_on!([&0_u8], file, &64_u8);
-    one_bar_note_on!([&0_u8], file, &67_u8);
+    write_major_on!([&0_u8], file, &60_u8);
 
     // 止める
-    one_bar_note_off!([&158_u8, &0_u8], file, &60_u8);
-    one_bar_note_off!([&0_u8], file, &64_u8);
-    one_bar_note_off!([&0_u8], file, &67_u8);
+    write_major_off!([&158_u8, &0_u8], file, &60_u8);
 
     // F
-    one_bar_note_on!([&0_u8], file, &65_u8);
-    one_bar_note_on!([&0_u8], file, &69_u8);
-    one_bar_note_on!([&0_u8], file, &72_u8);
-
-    one_bar_note_off!([&158_u8, &0_u8], file, &65_u8);
-    one_bar_note_off!([&0_u8], file, &69_u8);
-    one_bar_note_off!([&0_u8], file, &72_u8);
+    write_major_on!([&0_u8], file, &65_u8);
+    write_major_off!([&158_u8, &0_u8], file, &65_u8);
 
     // G
-    one_bar_note_on!([&0_u8], file, &67_u8);
-    one_bar_note_on!([&0_u8], file, &71_u8);
-    one_bar_note_on!([&0_u8], file, &74_u8);
-
-    one_bar_note_off!([&158_u8, &0_u8], file, &67_u8);
-    one_bar_note_off!([&0_u8], file, &71_u8);
-    one_bar_note_off!([&0_u8], file, &74_u8);
+    write_major_on!([&0_u8], file, &67_u8);
+    write_major_off!([&158_u8, &0_u8], file, &67_u8);
 
     // C
-    one_bar_note_on!([&0_u8], file, &60_u8);
-    one_bar_note_on!([&0_u8], file, &64_u8);
-    one_bar_note_on!([&0_u8], file, &67_u8);
-
-    one_bar_note_off!([&158_u8, &0_u8], file, &60_u8);
-    one_bar_note_off!([&0_u8], file, &64_u8);
-    one_bar_note_off!([&0_u8], file, &67_u8);
+    write_major_on!([&0_u8], file, &60_u8);
+    write_major_off!([&158_u8, &0_u8], file, &60_u8);
 
     // End of Track
     let zero: i8 = 0;
