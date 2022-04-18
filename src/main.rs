@@ -18,6 +18,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let buf = "MThd";
 
     file.write_all(buf.as_bytes())?;
+
+    let buf2: i32 = 6;
+    file.write_all(&buf2.to_be_bytes());
+
     file.flush()?;
     Ok(())
 }
