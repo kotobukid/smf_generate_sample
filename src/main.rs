@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create("./output/f.mid")?;
 
     // let buf = BufReader::new(io::stdin()).bytes().collect::<io::Result<Vec<u8>>>()?;
-    let buf = "hello world";
+    let buf = "MThd";
 
     file.write_all(buf.as_bytes())?;
     file.flush()?;
