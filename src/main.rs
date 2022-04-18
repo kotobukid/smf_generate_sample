@@ -5,7 +5,12 @@ use std::io::{self, Read, Write, BufReader};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Hello, world!");
 
-    fs::create_dir("./output");
+    match fs::create_dir("./output") {
+        Err(why) => println!("! {:?}", why.kind()),
+        Ok(_) => {}
+    }
+
+    println!("{}", "directory exists or created");
 
     let mut file = File::create("./output/f.mid")?;
 
