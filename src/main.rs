@@ -2,6 +2,31 @@ use std::fs;
 use std::fs::File;
 use std::io::{Write};
 
+macro_rules! one_bar_note_on {
+    ( $t:expr, $f:expr, $x:expr ) => {
+        for t in $t.iter() {
+            $f.write_all(&t.to_be_bytes())?;   // スタートTick
+        }
+
+        $f.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
+        $f.write_all(&$x.to_be_bytes())?;
+        $f.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+    };
+}
+
+macro_rules! one_bar_note_off {
+    ( $t:expr, $f:expr, $x:expr ) => {
+        for t in $t.iter() {
+            $f.write_all(&t.to_be_bytes())?;   // スタートTick
+        }
+
+        $f.write_all(&128_u8.to_be_bytes())?;   // 80 ノートOFFは8スタート
+        $f.write_all(&$x.to_be_bytes())?;
+        $f.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+    };
+}
+
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match fs::create_dir("./output") {
         Err(why) => println!("! {:?}", why.kind()),
@@ -134,57 +159,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(&7_i8.to_be_bytes())?;   // 07
     file.write_all(&100_u8.to_be_bytes())?;   // 64 ボリューム100
 
-    // ドを鳴らす
-    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
-    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
-
-    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
-    file.write_all(&60_u8.to_be_bytes())?;   // 3C  ド
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-
-    // ミ
-    // 鳴らす
-    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
-    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
-
-    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
-    file.write_all(&64_u8.to_be_bytes())?;   // 3C  ミ
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-    // ソ
-    // 鳴らす
-    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
-    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
-
-    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
-    file.write_all(&67_u8.to_be_bytes())?;   // 3C  ソ
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-
-    // ドを止める
-    file.write_all(&158_u8.to_be_bytes())?; // 9E 00
-    file.write_all(&0_u8.to_be_bytes())?;   // 2つで3840tick経過時点スタート
-
-    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
-    file.write_all(&60_u8.to_be_bytes())?;   // 3C  ド
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-
+    // Cを鳴らす
+    one_bar_note_on!([&0_u8], file, &60_u8);
+    one_bar_note_on!([&0_u8], file, &64_u8);
+    one_bar_note_on!([&0_u8], file, &67_u8);
 
     // 止める
-    file.write_all(&0_u8.to_be_bytes())?;
+    one_bar_note_off!([&158_u8, &0_u8], file, &60_u8);
+    one_bar_note_off!([&0_u8], file, &64_u8);
+    one_bar_note_off!([&0_u8], file, &67_u8);
 
-    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
-    file.write_all(&64_u8.to_be_bytes())?;   // 3C  ミ
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+    // F
+    one_bar_note_on!([&0_u8], file, &65_u8);
+    one_bar_note_on!([&0_u8], file, &69_u8);
+    one_bar_note_on!([&0_u8], file, &72_u8);
 
+    one_bar_note_off!([&158_u8, &0_u8], file, &65_u8);
+    one_bar_note_off!([&0_u8], file, &69_u8);
+    one_bar_note_off!([&0_u8], file, &72_u8);
 
+    // G
+    one_bar_note_on!([&0_u8], file, &67_u8);
+    one_bar_note_on!([&0_u8], file, &71_u8);
+    one_bar_note_on!([&0_u8], file, &74_u8);
 
-    // 止める
-    file.write_all(&0_u8.to_be_bytes())?;
+    one_bar_note_off!([&158_u8, &0_u8], file, &67_u8);
+    one_bar_note_off!([&0_u8], file, &71_u8);
+    one_bar_note_off!([&0_u8], file, &74_u8);
 
-    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
-    file.write_all(&67_u8.to_be_bytes())?;   // 3C  ソ
-    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+    // C
+    one_bar_note_on!([&0_u8], file, &60_u8);
+    one_bar_note_on!([&0_u8], file, &64_u8);
+    one_bar_note_on!([&0_u8], file, &67_u8);
 
-
+    one_bar_note_off!([&158_u8, &0_u8], file, &60_u8);
+    one_bar_note_off!([&0_u8], file, &64_u8);
+    one_bar_note_off!([&0_u8], file, &67_u8);
 
     // End of Track
     let zero: i8 = 0;
@@ -195,8 +205,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(&two_f.to_be_bytes())?;
     file.write_all(&zero.to_be_bytes())?;
 
-
     file.flush()?;
     Ok(())
 }
+
 
