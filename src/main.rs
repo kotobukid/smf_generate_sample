@@ -28,6 +28,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let resolution: i16 = 960;
     file.write_all(&resolution.to_be_bytes())?;
 
+    //　コンダクタートラック
+
     let start_track: &str = "MTrk";
     file.write_all(start_track.as_bytes())?;
 
@@ -79,6 +81,120 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(&ff.to_be_bytes())?;
     file.write_all(&two_f.to_be_bytes())?;
     file.write_all(&zero.to_be_bytes())?;
+
+
+    // 演奏トラック
+    let start_track: &str = "MTrk";
+    file.write_all(start_track.as_bytes())?;
+
+    // トラックの長さ
+    let track_length: i32 = 43;
+    file.write_all(&track_length.to_be_bytes())?;
+
+    // トラックタイトル（なし）
+    let before_start_track_title_1: i16 = 255;    // 00FFxx   を表現したいが今回は分割して記述
+    file.write_all(&before_start_track_title_1.to_be_bytes())?;
+    let before_start_track_title1_2: i8 = 3;
+    file.write_all(&before_start_track_title1_2.to_be_bytes())?;
+    file.write_all(&0_i8.to_be_bytes())?;
+
+    // ポート
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&255_u8.to_be_bytes())?;   // ff
+    file.write_all(&33_u8.to_be_bytes())?;   // 21
+    file.write_all(&1_u8.to_be_bytes())?;   // 01
+    file.write_all(&0_u8.to_be_bytes())?;   // 00
+
+    // リセットオールコントローラーCC#21
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&176_u8.to_be_bytes())?;   // B0 （チャンネル1）
+    file.write_all(&121_u8.to_be_bytes())?;   // 79
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+
+    // バンクセレクトMSB(CC#0)
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&176_u8.to_be_bytes())?;   // B0
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+
+    // バンクセレクトLSB(CC#32)
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&176_u8.to_be_bytes())?;   // B0
+    file.write_all(&32_u8.to_be_bytes())?;   // 20
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+
+    // プログラムチェンジ
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&192_u8.to_be_bytes())?;   // C0
+    file.write_all(&41_u8.to_be_bytes())?;   // 28  1始まり
+
+    // ボリューム
+    file.write_all(&0_i8.to_be_bytes())?;   // 00
+    file.write_all(&176_u8.to_be_bytes())?;   // B0
+    file.write_all(&7_i8.to_be_bytes())?;   // 07
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ボリューム100
+
+    // ドを鳴らす
+    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
+    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
+
+    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
+    file.write_all(&60_u8.to_be_bytes())?;   // 3C  ド
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+
+    // ミ
+    // 鳴らす
+    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
+    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
+
+    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
+    file.write_all(&64_u8.to_be_bytes())?;   // 3C  ミ
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+    // ソ
+    // 鳴らす
+    // file.write_all(&0_u8.to_be_bytes())?; // 9E 00
+    file.write_all(&0_u8.to_be_bytes())?;   // 0tick経過時点スタート
+
+    file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
+    file.write_all(&67_u8.to_be_bytes())?;   // 3C  ソ
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+
+    // ドを止める
+    file.write_all(&158_u8.to_be_bytes())?; // 9E 00
+    file.write_all(&0_u8.to_be_bytes())?;   // 2つで3840tick経過時点スタート
+
+    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
+    file.write_all(&60_u8.to_be_bytes())?;   // 3C  ド
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+
+
+    // 止める
+    file.write_all(&0_u8.to_be_bytes())?;
+
+    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
+    file.write_all(&64_u8.to_be_bytes())?;   // 3C  ミ
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+
+
+
+    // 止める
+    file.write_all(&0_u8.to_be_bytes())?;
+
+    file.write_all(&128_u8.to_be_bytes())?;   // 90 ノートOFFは8スタート
+    file.write_all(&67_u8.to_be_bytes())?;   // 3C  ソ
+    file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+
+
+
+    // End of Track
+    let zero: i8 = 0;
+    let ff: u8 = 255;
+    let two_f: i8 = 47;
+    file.write_all(&zero.to_be_bytes())?;
+    file.write_all(&ff.to_be_bytes())?;
+    file.write_all(&two_f.to_be_bytes())?;
+    file.write_all(&zero.to_be_bytes())?;
+
 
     file.flush()?;
     Ok(())
