@@ -52,9 +52,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create("./output/f.mid")?;
 
-    let buf: &str = "MThd";
+    macro_rules! write {
+        ($b:expr) => {
+            file.write_all($b)?;
+        }
+    }
 
-    file.write_all(buf.as_bytes())?;
+    let mthd: &str = "MThd";
+
+    write!(mthd.as_bytes());
 
     let buf2: i32 = 6;
     file.write_all(&buf2.to_be_bytes())?;
