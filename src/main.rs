@@ -52,6 +52,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
     }
 
+    macro_rules! chord_on {
+        ($time:expr, $root:expr, $type:expr) => {
+            match $type {
+                "" => {major_on!($time, $root);},
+                "m" => {minor_on!($time, $root);},
+                "M" => {major_on!($time, $root);},
+                _ => ()
+            }
+        }
+    }
+
+    macro_rules! chord_off {
+        ($time:expr, $root:expr, $type:expr) => {
+            match $type {
+                "" => {major_off!($time, $root);},
+                "m" => {minor_off!($time, $root);},
+                "M" => {major_off!($time, $root);},
+                _ => ()
+            }
+        }
+    }
+
     macro_rules! minor_on {
         ($time:expr, $root:expr) => {
             one_bar_note_on!($time, &note_in_range($root));
@@ -219,24 +241,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([0_u8, 176_u8, 7_u8, 100_u8]);   // 00 B0 07 64 (ボリューム100)
 
     // C
-    major_on!([&0_u8], 60_u8);
-    major_off!([&158_u8, &0_u8], 60_u8);
+    chord_on!([&0_u8], 60_u8, "m");
+    chord_off!([&158_u8, &0_u8], 60_u8, "m");
 
     // F
-    major_on!([&0_u8], 65_u8);
-    major_off!([&158_u8, &0_u8], 65_u8);
+    chord_on!([&0_u8], 65_u8, "");
+    chord_off!([&158_u8, &0_u8], 65_u8, "");
 
     // Am
-    minor_on!([&0_u8], 69_u8);
-    minor_off!([&158_u8, &0_u8], 69_u8);
+    chord_on!([&0_u8], 69_u8, "m");
+    chord_off!([&158_u8, &0_u8], 69_u8, "m");
 
     // // G
-    // write_major_on!([&0_u8], 67_u8);
-    // write_major_off!([&158_u8, &0_u8], 67_u8);
+    // chord_on!([&0_u8], 67_u8, "major");
+    // major_off!([&158_u8, &0_u8], 67_u8, "major");
 
     // C
-    major_on!([&0_u8], 60_u8);
-    major_off!([&158_u8, &0_u8], 60_u8);
+    chord_on!([&0_u8], 60_u8, "m");
+    chord_off!([&158_u8, &0_u8], 60_u8, "m");
 
     // End of Track
     let zero: u8 = 0;
