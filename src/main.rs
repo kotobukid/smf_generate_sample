@@ -87,10 +87,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // file.write_all(&file_format.to_be_bytes())?;
 
     let track_amount: i16 = 2;
-    file.write_all(&track_amount.to_be_bytes())?;
+    // file.write_all(&track_amount.to_be_bytes())?;
+    write_i16!(track_amount);
 
     let resolution: i16 = 960;
-    file.write_all(&resolution.to_be_bytes())?;
+    // file.write_all(&resolution.to_be_bytes())?;
+    write_i16!(resolution);
 
     //　コンダクタートラック
 
