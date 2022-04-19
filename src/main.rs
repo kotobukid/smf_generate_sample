@@ -18,15 +18,25 @@ fn note_in_range(note: u8) -> u8 {
     }
 }
 
+fn note_to_chord(note: u8, chord_type: &str) -> Vec<u8> {
+    match chord_type {
+        "" => [note + 4, note + 7].to_vec(),
+        "m" => [note + 3, note + 10].to_vec(),
+        "7" => [note + 4, note + 7, note + 10].to_vec(),
+        "M7" => [note + 4, note + 7, note + 11].to_vec(),
+        "m7" => [note + 3, note + 7, note + 10].to_vec(),
+        "mM7" => [note + 3, note + 7, note + 11].to_vec(),
+        _ => [].to_vec()
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match fs::create_dir("./output") {
         Err(why) => println!("! {:?}", why.kind()),
         Ok(_) => {}
     }
 
-    println!("{}", "directory exists or created");
-
-    let mut file = File::create("./output/f.mid")?;
+    let mut file = File::create("./output/chord.mid")?;
 
     macro_rules! one_bar_note_on {
         ( $t:expr, $x:expr ) => {
@@ -54,79 +64,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! chord_on {
         ($time:expr, $root:expr, $type:expr) => {
-            match $type {
-                "" => {major_on!($time, $root, false);},
-                "m" => {minor_on!($time, $root, false);},
-                "M" => {major_on!($time, $root, false);},
-                "7" => {major_on!($time, $root, true);},
-                "m7" => {minor_on!($time, $root, true);},
-                // "M7" => {major_on!($time, $root, true);},
-                _ => ()
+            let notes: Vec<u8> = note_to_chord($root, $type);
+
+            one_bar_note_on!($time, &note_in_range($root));
+            for n in notes {
+                one_bar_note_on!([&0_u8], &note_in_range(n));
             }
+
+            one_bar_note_on!([&0_u8], $root - 24);
+            one_bar_note_on!([&0_u8], $root - 12);
         }
     }
 
     macro_rules! chord_off {
         ($time:expr, $root:expr, $type:expr) => {
-            match $type {
-                "" => {major_off!($time, $root, false);},
-                "m" => {minor_off!($time, $root, false);},
-                "M" => {major_off!($time, $root, false);},
-                "7" => {major_off!($time, $root, true);},
-                "m7" => {minor_off!($time, $root, true);},
-                // "M7" => {major_off!($time, $root, true);},
-                _ => ()
-            }
-        }
-    }
 
-    macro_rules! minor_on {
-        ($time:expr, $root:expr, $seventh:expr) => {
-            one_bar_note_on!($time, &note_in_range($root));
-            one_bar_note_on!([&0_u8], &note_in_range($root + 3));
-            one_bar_note_on!([&0_u8], &note_in_range($root + 7));
-            if $seventh {
-                one_bar_note_on!([&0_u8], &note_in_range($root + 10));
-            }
-            one_bar_note_on!([&0_u8], $root - 24);
-            one_bar_note_on!([&0_u8], $root - 12);
-        }
-    }
+            let notes: Vec<u8> = note_to_chord($root, $type);
 
-    macro_rules! minor_off {
-        ( $t:expr , $root:expr, $seventh:expr) => {
-            one_bar_note_off!($t, &note_in_range($root));
-            one_bar_note_off!([&0_u8], &note_in_range($root + 3));
-            one_bar_note_off!([&0_u8], &note_in_range($root + 7));
-            if $seventh {
-                one_bar_note_off!([&0_u8], &note_in_range($root + 10));
+            one_bar_note_off!($time, &note_in_range($root));
+            for n in notes {
+                one_bar_note_off!([&0_u8], &note_in_range(n));
             }
-            one_bar_note_off!([&0_u8], $root - 24);
-            one_bar_note_off!([&0_u8], $root - 12);
-        }
-    }
 
-    macro_rules! major_on {
-        ( $t:expr , $root:expr, $seventh:expr) => {
-            one_bar_note_on!($t, &note_in_range($root));
-            one_bar_note_on!([&0_u8], &note_in_range($root + 4));
-            one_bar_note_on!([&0_u8], &note_in_range($root + 7));
-            if $seventh {
-                one_bar_note_on!([&0_u8], &note_in_range($root + 10));
-            }
-            one_bar_note_on!([&0_u8], $root - 24);
-            one_bar_note_on!([&0_u8], $root - 12);
-        }
-    }
-
-    macro_rules! major_off {
-        ( $t:expr , $root:expr, $seventh:expr) => {
-            one_bar_note_off!($t, &note_in_range($root));
-            one_bar_note_off!([&0_u8], &note_in_range($root + 4));
-            one_bar_note_off!([&0_u8], &note_in_range($root + 7));
-            if $seventh {
-                one_bar_note_off!([&0_u8], &note_in_range($root + 10));
-            }
             one_bar_note_off!([&0_u8], $root - 24);
             one_bar_note_off!([&0_u8], $root - 12);
         }
@@ -134,25 +93,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! write_num {
         ($i:expr) => {
-            // println!("{}", type_of($i));
-
             for i in $i.iter() {
                 file.write_all(&i.to_be_bytes())?
             }
-            // match $i {
-            //     // i16 => {println!("Iterator")},
-            //     // [u8,] => {println!("Iterator")},
-            //     // [i32,] => {println!("Iterator")},
-            //     _ => {
-            //     },
-            // }
-
-            // match type_of($i).chars().nth(0) {
-            //     Some('[') => for i in $i {file.write_all(&i.to_be_bytes())?;},
-            //     _ => file.write_all(&$i.to_be_bytes())?,
-            // }
-
-            // file.write_all(&$i.to_be_bytes())?;
         }
     }
 
@@ -160,10 +103,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ($b:expr) => {
 
             file.write_all(&$b.as_bytes())?;
-            // match type_of(&$b) {
-            //     i16 => file.write_all(&$b.to_be_bytes())?,
-            //     _ => (),
-            // }
         }
     }
 
@@ -259,8 +198,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([0_u8, 176_u8, 7_u8, 100_u8]);   // 00 B0 07 64 (ボリューム100)
 
     // C
-    chord_on!([&0_u8], 60_u8, "m");
-    chord_off!([&158_u8, &0_u8], 60_u8, "m");
+    chord_on!([&0_u8], 60_u8, "mM7");
+    chord_off!([&158_u8, &0_u8], 60_u8, "mM7");
 
     // F
     chord_on!([&0_u8], 65_u8, "");
