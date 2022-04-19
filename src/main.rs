@@ -48,6 +48,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             one_bar_note_on!($t, $root);
             one_bar_note_on!([&0_u8], $root + 4);
             one_bar_note_on!([&0_u8], $root + 7);
+            one_bar_note_on!([&0_u8], $root - 24);
+            one_bar_note_on!([&0_u8], $root - 12);
         }
     }
     macro_rules! write_major_off {
@@ -55,6 +57,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             one_bar_note_off!($t, $root);
             one_bar_note_off!([&0_u8], $root + 4);
             one_bar_note_off!([&0_u8], $root + 7);
+            one_bar_note_off!([&0_u8], $root - 24);
+            one_bar_note_off!([&0_u8], $root - 12);
         }
     }
 
