@@ -52,7 +52,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         };
     }
 
-    macro_rules! write_major_on {
+    macro_rules! minor_on {
+        ($time:expr, $root:expr) => {
+            one_bar_note_on!($time, &note_in_range($root));
+            one_bar_note_on!([&0_u8], &note_in_range($root + 3));
+            one_bar_note_on!([&0_u8], &note_in_range($root + 7));
+            one_bar_note_on!([&0_u8], $root - 24);
+            one_bar_note_on!([&0_u8], $root - 12);
+        }
+    }
+
+    macro_rules! minor_off {
+        ( $t:expr , $root:expr) => {
+            one_bar_note_off!($t, &note_in_range($root));
+            one_bar_note_off!([&0_u8], &note_in_range($root + 3));
+            one_bar_note_off!([&0_u8], &note_in_range($root + 7));
+            one_bar_note_off!([&0_u8], $root - 24);
+            one_bar_note_off!([&0_u8], $root - 12);
+        }
+    }
+
+    macro_rules! major_on {
         ( $t:expr , $root:expr) => {
             one_bar_note_on!($t, &note_in_range($root));
             one_bar_note_on!([&0_u8], &note_in_range($root + 4));
@@ -61,7 +81,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             one_bar_note_on!([&0_u8], $root - 12);
         }
     }
-    macro_rules! write_major_off {
+
+    macro_rules! major_off {
         ( $t:expr , $root:expr) => {
             one_bar_note_off!($t, &note_in_range($root));
             one_bar_note_off!([&0_u8], &note_in_range($root + 4));
@@ -198,20 +219,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([0_u8, 176_u8, 7_u8, 100_u8]);   // 00 B0 07 64 (ボリューム100)
 
     // C
-    write_major_on!([&0_u8], 60_u8);
-    write_major_off!([&158_u8, &0_u8], 60_u8);
+    major_on!([&0_u8], 60_u8);
+    major_off!([&158_u8, &0_u8], 60_u8);
 
     // F
-    write_major_on!([&0_u8], 65_u8);
-    write_major_off!([&158_u8, &0_u8], 65_u8);
+    major_on!([&0_u8], 65_u8);
+    major_off!([&158_u8, &0_u8], 65_u8);
 
-    // G
-    write_major_on!([&0_u8], 67_u8);
-    write_major_off!([&158_u8, &0_u8], 67_u8);
+    // Am
+    minor_on!([&0_u8], 69_u8);
+    minor_off!([&158_u8, &0_u8], 69_u8);
+
+    // // G
+    // write_major_on!([&0_u8], 67_u8);
+    // write_major_off!([&158_u8, &0_u8], 67_u8);
 
     // C
-    write_major_on!([&0_u8], 60_u8);
-    write_major_off!([&158_u8, &0_u8], 60_u8);
+    major_on!([&0_u8], 60_u8);
+    major_off!([&158_u8, &0_u8], 60_u8);
 
     // End of Track
     let zero: u8 = 0;
