@@ -55,9 +55,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     macro_rules! chord_on {
         ($time:expr, $root:expr, $type:expr) => {
             match $type {
-                "" => {major_on!($time, $root);},
-                "m" => {minor_on!($time, $root);},
-                "M" => {major_on!($time, $root);},
+                "" => {major_on!($time, $root, false);},
+                "m" => {minor_on!($time, $root, false);},
+                "M" => {major_on!($time, $root, false);},
+                "7" => {major_on!($time, $root, true);},
+                "m7" => {minor_on!($time, $root, true);},
+                // "M7" => {major_on!($time, $root, true);},
                 _ => ()
             }
         }
@@ -66,49 +69,64 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     macro_rules! chord_off {
         ($time:expr, $root:expr, $type:expr) => {
             match $type {
-                "" => {major_off!($time, $root);},
-                "m" => {minor_off!($time, $root);},
-                "M" => {major_off!($time, $root);},
+                "" => {major_off!($time, $root, false);},
+                "m" => {minor_off!($time, $root, false);},
+                "M" => {major_off!($time, $root, false);},
+                "7" => {major_off!($time, $root, true);},
+                "m7" => {minor_off!($time, $root, true);},
+                // "M7" => {major_off!($time, $root, true);},
                 _ => ()
             }
         }
     }
 
     macro_rules! minor_on {
-        ($time:expr, $root:expr) => {
+        ($time:expr, $root:expr, $seventh:expr) => {
             one_bar_note_on!($time, &note_in_range($root));
             one_bar_note_on!([&0_u8], &note_in_range($root + 3));
             one_bar_note_on!([&0_u8], &note_in_range($root + 7));
+            if $seventh {
+                one_bar_note_on!([&0_u8], &note_in_range($root + 10));
+            }
             one_bar_note_on!([&0_u8], $root - 24);
             one_bar_note_on!([&0_u8], $root - 12);
         }
     }
 
     macro_rules! minor_off {
-        ( $t:expr , $root:expr) => {
+        ( $t:expr , $root:expr, $seventh:expr) => {
             one_bar_note_off!($t, &note_in_range($root));
             one_bar_note_off!([&0_u8], &note_in_range($root + 3));
             one_bar_note_off!([&0_u8], &note_in_range($root + 7));
+            if $seventh {
+                one_bar_note_off!([&0_u8], &note_in_range($root + 10));
+            }
             one_bar_note_off!([&0_u8], $root - 24);
             one_bar_note_off!([&0_u8], $root - 12);
         }
     }
 
     macro_rules! major_on {
-        ( $t:expr , $root:expr) => {
+        ( $t:expr , $root:expr, $seventh:expr) => {
             one_bar_note_on!($t, &note_in_range($root));
             one_bar_note_on!([&0_u8], &note_in_range($root + 4));
             one_bar_note_on!([&0_u8], &note_in_range($root + 7));
+            if $seventh {
+                one_bar_note_on!([&0_u8], &note_in_range($root + 10));
+            }
             one_bar_note_on!([&0_u8], $root - 24);
             one_bar_note_on!([&0_u8], $root - 12);
         }
     }
 
     macro_rules! major_off {
-        ( $t:expr , $root:expr) => {
+        ( $t:expr , $root:expr, $seventh:expr) => {
             one_bar_note_off!($t, &note_in_range($root));
             one_bar_note_off!([&0_u8], &note_in_range($root + 4));
             one_bar_note_off!([&0_u8], &note_in_range($root + 7));
+            if $seventh {
+                one_bar_note_off!([&0_u8], &note_in_range($root + 10));
+            }
             one_bar_note_off!([&0_u8], $root - 24);
             one_bar_note_off!([&0_u8], $root - 12);
         }
@@ -257,8 +275,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // major_off!([&158_u8, &0_u8], 67_u8, "major");
 
     // C
-    chord_on!([&0_u8], 60_u8, "m");
-    chord_off!([&158_u8, &0_u8], 60_u8, "m");
+    chord_on!([&0_u8], 60_u8, "m7");
+    chord_off!([&158_u8, &0_u8], 60_u8, "m7");
 
     // End of Track
     let zero: u8 = 0;
