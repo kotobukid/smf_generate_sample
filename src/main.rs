@@ -41,6 +41,12 @@ macro_rules! write_major_off {
     }
 }
 
+#[allow(dead_code)]
+fn type_of<T>(_: T) -> String {
+    let a = std::any::type_name::<T>();
+    return a.to_string();
+}
+
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match fs::create_dir("./output") {
@@ -52,21 +58,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut file = File::create("./output/f.mid")?;
 
+    macro_rules! write_i16 {
+        ($i:expr) => {
+            file.write_all(&$i.to_be_bytes())?;
+        }
+    }
+
     macro_rules! write {
         ($b:expr) => {
-            file.write_all($b)?;
+
+            file.write_all(&$b.as_bytes())?;
+            // match type_of(&$b) {
+            //     i16 => file.write_all(&$b.to_be_bytes())?,
+            //     _ => (),
+            // }
         }
     }
 
     let mthd: &str = "MThd";
 
-    write!(mthd.as_bytes());
+    write!(mthd);
 
     let buf2: i32 = 6;
     file.write_all(&buf2.to_be_bytes())?;
 
     let file_format: i16 = 1;
-    file.write_all(&file_format.to_be_bytes())?;
+    write_i16!(file_format);
+    // file.write_all(&file_format.to_be_bytes())?;
 
     let track_amount: i16 = 2;
     file.write_all(&track_amount.to_be_bytes())?;
@@ -208,6 +226,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     file.write_all(&zero.to_be_bytes())?;
 
     file.flush()?;
+    println!("complete");
     Ok(())
 }
 
