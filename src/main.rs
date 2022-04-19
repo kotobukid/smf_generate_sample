@@ -60,18 +60,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! write_num {
         ($i:expr) => {
-            println!("{}", type_of($i));
+            // println!("{}", type_of($i));
 
-            match $i {
-                // i16 => {println!("Iterator")},
-                // [u8,] => {println!("Iterator")},
-                // [i32,] => {println!("Iterator")},
-                _ => {
-                    for i in $i.iter() {
-                        file.write_all(&i.to_be_bytes())?
-                    }
-                },
+            for i in $i.iter() {
+                file.write_all(&i.to_be_bytes())?
             }
+            // match $i {
+            //     // i16 => {println!("Iterator")},
+            //     // [u8,] => {println!("Iterator")},
+            //     // [i32,] => {println!("Iterator")},
+            //     _ => {
+            //     },
+            // }
 
             // match type_of($i).chars().nth(0) {
             //     Some('[') => for i in $i {file.write_all(&i.to_be_bytes())?;},
@@ -101,13 +101,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([buf2]);
 
     let file_format: i16 = 1;
-    write_num!([file_format]);
-
     let track_amount: i16 = 2;
-    write_num!([track_amount]);
-
     let resolution: i16 = 960;
-    write_num!([resolution]);
+    write_num!([file_format, track_amount, resolution]);
 
     //　コンダクタートラック
 
@@ -117,10 +113,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let track_length: i32 = 23;
     write_num!([track_length]);
 
-    let before_start_track_title: i16 = 255;
     // 00FFxx   を表現したいが今回は分割して記述
-    write_num!([before_start_track_title]);
+    let before_start_track_title: i16 = 255;
     let before_start_track_title2: i8 = 3;
+    write_num!([before_start_track_title]);
     write_num!([before_start_track_title2]);
 
 
@@ -133,46 +129,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let tick: u8 = 135;  // 960 / 128
     let tick_b: u8 = 64;
     // 960 % 128
-    write_num!([tick]);
-    write_num!([tick_b]);
+    write_num!([tick, tick_b]);
 
     // Tempo
-    write_num!([0_i8]);
-    // 00
-    write_num!([255_u8]);
-    // FF
-    write_num!([81_u8]);
-    // 51
-    write_num!([03_u8]);
-    // 03   続く3バイトでテンポ情報を送る
-    write_num!([06_i8]);
-    write_num!([138_u8]);
-    write_num!([27_u8]);
+    write_num!([0_u8, 255_u8, 81_u8, 03_u8]);
+    // 00 FF 51 03(続く3バイトでテンポ情報を送る)
+    write_num!([06_u8, 138_u8, 27_u8]);
 
     // 拍子
-    write_num!([0_i8]);
-    write_num!([255_u8]);
-    write_num!([88_u8]);
-    // 58
-    write_num!([4_u8]);
-    // 04
-    write_num!([4_u8]);
-    // 04
-    write_num!([2_u8]);
-    // 02
-    write_num!([26_u8]);
-    // 18
-    write_num!([8_u8]); // 08
+    write_num!([0_u8, 255_u8]);
+    write_num!([88_u8, 4_u8, 4_u8, 2_u8, 26_u8, 8_u8]); // 58 04 04 02 18 08
 
 
     // End of Track
     let zero: u8 = 0;
     let ff: u8 = 255;
     let two_f: u8 = 47;
-    // write_num!(zero);
-    // write_num!(ff);
-    // write_num!(two_f);
-    // write_num!(zero);
     write_num!([zero, ff, two_f, zero]);
 
 
@@ -193,63 +165,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([0_i8]);
 
     // ポート
-    write_num!([0_i8]);
-    // 00
-    write_num!([255_u8]);
-    // ff
-    write_num!([33_u8]);
-    // 21
-    write_num!([1_u8]);
-    // 01
-    write_num!([0_u8]);   // 00
+    write_num!([0_u8, 255_u8, 33_u8, 1_u8, 0_u8]);   // 00 FF 21 01 00
 
     // リセットオールコントローラーCC#21
-    write_num!([0_i8]);
-    // 00
-    write_num!([176_u8]);
-    // B0 （チャンネル1）
-    write_num!([121_u8]);
-    // 79
-    write_num!([0_i8]);   // 00
+    write_num!([0_u8, 176_u8, 121_u8, 0_u8]);   // 00 B0(チャンネル1) 79 00
 
     // バンクセレクトMSB(CC#0)
-    write_num!([0_i8]);
-    // 00
-    write_num!([176_u8]);
-    // B0
-    write_num!([0_i8]);
-    // 00
-    write_num!([0_i8]);   // 00
+    write_num!([0_u8, 176_u8, 0_u8, 0_u8]);   // 00 B0 00 00
 
     // バンクセレクトLSB(CC#32)
-    write_num!([0_i8]);
-    // 00
-    write_num!([176_u8]);
-    // B0
-    write_num!([32_u8]);
-    // 20
-    write_num!([0_i8]);   // 00
+    write_num!([0_u8, 176_u8, 32_u8, 0_u8]);   // 00 B0 20 00
 
     // プログラムチェンジ
-    write_num!([0_i8]);
-    // 00
-    write_num!([192_u8]);
+    write_num!([0_u8, 192_u8]);
     // C0
     write_num!([41_u8]);   // 28  1始まり
 
     // ボリューム
-    write_num!([0_i8]);
-    // 00
-    write_num!([176_u8]);
-    // B0
-    write_num!([7_i8]);
-    // 07
-    write_num!([100_u8]);   // 64 ボリューム100
+    write_num!([0_u8, 176_u8, 7_u8, 100_u8]);   // 00 B0 07 64 (ボリューム100)
 
-    // Cを鳴らす
+    // C
     write_major_on!([&0_u8], &60_u8);
-
-    // 止める
     write_major_off!([&158_u8, &0_u8], &60_u8);
 
     // F
@@ -265,13 +201,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_major_off!([&158_u8, &0_u8], &60_u8);
 
     // End of Track
-    let zero: i8 = 0;
+    let zero: u8 = 0;
     let ff: u8 = 255;
-    let two_f: i8 = 47;
-    write_num!([zero]);
-    write_num!([ff]);
-    write_num!([two_f]);
-    write_num!([zero]);
+    let two_f: u8 = 47;
+    write_num!([zero, ff ,two_f, zero]);
 
     file.flush()?;
     println!("complete");
