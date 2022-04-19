@@ -30,6 +30,29 @@ fn note_to_chord(note: u8, chord_type: &str) -> Vec<u8> {
     }
 }
 
+fn note_name_to_num(name: &str) -> u8 {
+    match name {
+        "C" => 60,
+        "C#" => 61,
+        "Db" => 61,
+        "D" => 62,
+        "D#" => 63,
+        "Eb" => 63,
+        "E" => 64,
+        "F" => 65,
+        "F#" => 66,
+        "Gb" => 66,
+        "G" => 67,
+        "G#" => 68,
+        "Ab" => 68,
+        "A" => 69,
+        "A#" => 70,
+        "Bb" => 70,
+        "B" => 71,
+        _ => 60
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match fs::create_dir("./output") {
         Err(why) => println!("! {:?}", why.kind()),
@@ -64,30 +87,31 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! chord_on {
         ($time:expr, $root:expr, $type:expr) => {
-            let notes: Vec<u8> = note_to_chord($root, $type);
+            let root:u8 = note_name_to_num($root);
+            let notes: Vec<u8> = note_to_chord(root, $type);
 
-            one_bar_note_on!($time, &note_in_range($root));
+            one_bar_note_on!($time, &note_in_range(root));
             for n in notes {
                 one_bar_note_on!([&0_u8], &note_in_range(n));
             }
 
-            one_bar_note_on!([&0_u8], $root - 24);
-            one_bar_note_on!([&0_u8], $root - 12);
+            one_bar_note_on!([&0_u8], root - 24);
+            one_bar_note_on!([&0_u8], root - 12);
         }
     }
 
     macro_rules! chord_off {
         ($time:expr, $root:expr, $type:expr) => {
+            let root:u8 = note_name_to_num($root);
+            let notes: Vec<u8> = note_to_chord(root, $type);
 
-            let notes: Vec<u8> = note_to_chord($root, $type);
-
-            one_bar_note_off!($time, &note_in_range($root));
+            one_bar_note_off!($time, &note_in_range(root));
             for n in notes {
                 one_bar_note_off!([&0_u8], &note_in_range(n));
             }
 
-            one_bar_note_off!([&0_u8], $root - 24);
-            one_bar_note_off!([&0_u8], $root - 12);
+            one_bar_note_off!([&0_u8], root - 24);
+            one_bar_note_off!([&0_u8], root - 12);
         }
     }
 
@@ -198,24 +222,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_num!([0_u8, 176_u8, 7_u8, 100_u8]);   // 00 B0 07 64 (ボリューム100)
 
     // C
-    chord_on!([&0_u8], 60_u8, "mM7");
-    chord_off!([&158_u8, &0_u8], 60_u8, "mM7");
+    chord_on!([&0_u8], "C", "mM7");
+    chord_off!([&158_u8, &0_u8], "C", "mM7");
 
     // F
-    chord_on!([&0_u8], 65_u8, "");
-    chord_off!([&158_u8, &0_u8], 65_u8, "");
+    chord_on!([&0_u8], "F", "");
+    chord_off!([&158_u8, &0_u8], "F", "");
 
     // Am
-    chord_on!([&0_u8], 69_u8, "m");
-    chord_off!([&158_u8, &0_u8], 69_u8, "m");
+    chord_on!([&0_u8], "A", "m");
+    chord_off!([&158_u8, &0_u8], "A", "m");
 
     // // G
-    // chord_on!([&0_u8], 67_u8, "major");
-    // major_off!([&158_u8, &0_u8], 67_u8, "major");
+    // chord_on!([&0_u8], "G", "major");
+    // major_off!([&158_u8, &0_u8], "G", "major");
 
     // C
-    chord_on!([&0_u8], 60_u8, "m7");
-    chord_off!([&158_u8, &0_u8], 60_u8, "m7");
+    chord_on!([&0_u8], "C", "m7");
+    chord_off!([&158_u8, &0_u8], "C", "m7");
 
     // End of Track
     let zero: u8 = 0;
