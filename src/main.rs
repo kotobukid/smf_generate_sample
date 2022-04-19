@@ -2,45 +2,6 @@ use std::fs;
 use std::fs::File;
 use std::io::{Write};
 
-macro_rules! one_bar_note_on {
-    ( $t:expr, $f:expr, $x:expr ) => {
-        for t in $t.iter() {
-            $f.write_all(&t.to_be_bytes())?;   // スタートTick
-        }
-
-        $f.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
-        $f.write_all(&$x.to_be_bytes())?;
-        $f.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-    };
-}
-
-macro_rules! one_bar_note_off {
-    ( $t:expr, $f:expr, $x:expr ) => {
-        for t in $t.iter() {
-            $f.write_all(&t.to_be_bytes())?;   // スタートTick
-        }
-
-        $f.write_all(&128_u8.to_be_bytes())?;   // 80 ノートOFFは8スタート
-        $f.write_all(&$x.to_be_bytes())?;
-        $f.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
-    };
-}
-
-macro_rules! write_major_on {
-    ( $t:expr , $f:expr, $root:expr) => {
-        one_bar_note_on!($t, $f, $root);
-        one_bar_note_on!([&0_u8], $f, $root + 4);
-        one_bar_note_on!([&0_u8], $f, $root + 7);
-    }
-}
-macro_rules! write_major_off {
-    ( $t:expr , $f:expr, $root:expr) => {
-        one_bar_note_off!($t, $f, $root);
-        one_bar_note_off!([&0_u8], $f, $root + 4);
-        one_bar_note_off!([&0_u8], $f, $root + 7);
-    }
-}
-
 #[allow(dead_code)]
 fn type_of<T>(_: T) -> String {
     let a = std::any::type_name::<T>();
@@ -57,6 +18,45 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "directory exists or created");
 
     let mut file = File::create("./output/f.mid")?;
+
+    macro_rules! one_bar_note_on {
+        ( $t:expr, $x:expr ) => {
+            for t in $t.iter() {
+                file.write_all(&t.to_be_bytes())?;   // スタートTick
+            }
+
+            file.write_all(&144_u8.to_be_bytes())?;   // 90 ノートONは9スタート
+            file.write_all(&$x.to_be_bytes())?;
+            file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+        };
+    }
+
+    macro_rules! one_bar_note_off {
+        ( $t:expr, $x:expr ) => {
+            for t in $t.iter() {
+                file.write_all(&t.to_be_bytes())?;   // スタートTick
+            }
+
+            file.write_all(&128_u8.to_be_bytes())?;   // 80 ノートOFFは8スタート
+            file.write_all(&$x.to_be_bytes())?;
+            file.write_all(&100_u8.to_be_bytes())?;   // 64 ヴェロシティ
+        };
+    }
+
+    macro_rules! write_major_on {
+        ( $t:expr , $root:expr) => {
+            one_bar_note_on!($t, $root);
+            one_bar_note_on!([&0_u8], $root + 4);
+            one_bar_note_on!([&0_u8], $root + 7);
+        }
+    }
+    macro_rules! write_major_off {
+        ( $t:expr , $root:expr) => {
+            one_bar_note_off!($t, $root);
+            one_bar_note_off!([&0_u8], $root + 4);
+            one_bar_note_off!([&0_u8], $root + 7);
+        }
+    }
 
     macro_rules! write_i16 {
         ($i:expr) => {
@@ -228,22 +228,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_i16!(100_u8);   // 64 ボリューム100
 
     // Cを鳴らす
-    write_major_on!([&0_u8], file, &60_u8);
+    write_major_on!([&0_u8], &60_u8);
 
     // 止める
-    write_major_off!([&158_u8, &0_u8], file, &60_u8);
+    write_major_off!([&158_u8, &0_u8], &60_u8);
 
     // F
-    write_major_on!([&0_u8], file, &65_u8);
-    write_major_off!([&158_u8, &0_u8], file, &65_u8);
+    write_major_on!([&0_u8], &65_u8);
+    write_major_off!([&158_u8, &0_u8], &65_u8);
 
     // G
-    write_major_on!([&0_u8], file, &67_u8);
-    write_major_off!([&158_u8, &0_u8], file, &67_u8);
+    write_major_on!([&0_u8], &67_u8);
+    write_major_off!([&158_u8, &0_u8], &67_u8);
 
     // C
-    write_major_on!([&0_u8], file, &60_u8);
-    write_major_off!([&158_u8, &0_u8], file, &60_u8);
+    write_major_on!([&0_u8], &60_u8);
+    write_major_off!([&158_u8, &0_u8], &60_u8);
 
     // End of Track
     let zero: i8 = 0;
