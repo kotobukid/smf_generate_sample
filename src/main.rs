@@ -2,6 +2,51 @@ use std::fs;
 use std::fs::File;
 use std::io::{Write};
 
+#[test]
+fn it_works() {
+    assert_eq!(2 + 2, 4);
+}
+
+fn detect_root(name: &str) -> Result<u8, String> {
+    let mut adjust: i8 = 0;
+    let mut root: i8 = -1;
+
+    if name.len() > 1 {
+        match name.chars().nth(1) {
+            Some('#') => adjust = 1,
+            Some('b') => adjust = -1,
+            _ => ()
+        }
+    }
+
+    match name.chars().nth(0) {
+        Some('C') => root = 60,
+        Some('D') => root = 62,
+        Some('E') => root = 64,
+        Some('F') => root = 65,
+        Some('G') => root = 67,
+        Some('A') => root = 69,
+        Some('B') => root = 71,
+        _ => ()
+    }
+    if root == -1 {
+        return Err("note not detected".to_string());
+    }
+
+    Ok((root + adjust) as u8)
+}
+
+#[test]
+fn test_detect_root() {
+    assert_eq!(60, detect_root("C").unwrap());
+    assert_eq!(61, detect_root("C#").unwrap());
+    assert_eq!(61, detect_root("Db").unwrap());
+    assert_eq!(62, detect_root("D").unwrap());
+    assert_eq!(63, detect_root("D#").unwrap());
+    assert_eq!(63, detect_root("Eb").unwrap());
+    assert_eq!(70, detect_root("Bb").unwrap());
+}
+
 #[allow(dead_code)]
 fn type_of<T>(_: T) -> String {
     let a = std::any::type_name::<T>();
@@ -27,29 +72,6 @@ fn note_to_chord(note: u8, chord_type: &str) -> Vec<u8> {
         "m7" => [note + 3, note + 7, note + 10].to_vec(),
         "mM7" => [note + 3, note + 7, note + 11].to_vec(),
         _ => [].to_vec()
-    }
-}
-
-fn note_name_to_num(name: &str) -> u8 {
-    match name {
-        "C" => 60,
-        "C#" => 61,
-        "Db" => 61,
-        "D" => 62,
-        "D#" => 63,
-        "Eb" => 63,
-        "E" => 64,
-        "F" => 65,
-        "F#" => 66,
-        "Gb" => 66,
-        "G" => 67,
-        "G#" => 68,
-        "Ab" => 68,
-        "A" => 69,
-        "A#" => 70,
-        "Bb" => 70,
-        "B" => 71,
-        _ => 60
     }
 }
 
@@ -87,7 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! chord_on {
         ($time:expr, $root:expr, $type:expr) => {
-            let root:u8 = note_name_to_num($root);
+            let root:u8 = detect_root($root).unwrap();
             let notes: Vec<u8> = note_to_chord(root, $type);
 
             one_bar_note_on!($time, &note_in_range(root));
@@ -102,7 +124,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     macro_rules! chord_off {
         ($time:expr, $root:expr, $type:expr) => {
-            let root:u8 = note_name_to_num($root);
+            let root:u8 = detect_root($root).unwrap();
             let notes: Vec<u8> = note_to_chord(root, $type);
 
             one_bar_note_off!($time, &note_in_range(root));
